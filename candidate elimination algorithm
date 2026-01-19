@@ -1,0 +1,52 @@
+# Candidate-Elimination-Algorithm
+  import numpy as np
+import pandas as pd
+import os
+
+# Create a dummy enjoysport.csv file if it doesn't exist
+if not os.path.exists('/content/enjoysport.csv'):
+    data_enjoysport = {
+        'Sky': ['Sunny', 'Sunny', 'Rainy', 'Sunny'],
+        'AirTemp': ['Warm', 'Warm', 'Cold', 'Warm'],
+        'Humidity': ['Normal', 'High', 'High', 'High'],
+        'Wind': ['Strong', 'Strong', 'Strong', 'Strong'],
+        'Water': ['Warm', 'Warm', 'Warm', 'Warm'],
+        'Forecast': ['Same', 'Same', 'Change', 'Change'],
+        'EnjoySport': ['yes', 'yes', 'no', 'yes']
+    }
+    df_enjoysport = pd.DataFrame(data_enjoysport)
+    df_enjoysport.to_csv('/content/enjoysport.csv', index=False)
+    print("Created '/content/enjoysport.csv' with sample data.")
+
+data=pd.read_csv('/content/enjoysport.csv')
+concepts = np.array(data.iloc[:,:-1])
+target = np.array(data.iloc[:,-1])
+def learn(concepts, target):
+    specific_h = concepts[0].copy()
+    general_h = [["?" for i in range(len(specific_h))] for i in range(len(specific_h))]
+    for i, h in enumerate(concepts):
+        if target[i] == "yes":
+            for x in range(len(specific_h)):
+                if h[x] != specific_h[x]:
+                    specific_h[x] = '?'
+                    general_h[x][x] ='?'
+            print(" \n\nFor Training instance No:{0} the hypothesis is\n".format(i))
+            print("Specific Hypothesis: ",specific_h)
+            print("General Hypothesis: ",general_h,)
+        if target[i] == "no":
+            for x in range(len(specific_h)):
+                if h[x] != specific_h[x]:
+                    general_h[x][x] = specific_h[x]
+                else:
+                    general_h[x][x] = '?'
+            print(" \n\nFor Training instance No:{0} the hypothesis is\n".format(i))
+            print("Specific Hypothesis: ", specific_h)
+            print("General Hypothesis: ",general_h,)
+    indices = [i for i,val in enumerate(general_h) if val == ['?', '?', '?', '?', '?', '?']]
+    for i in indices:
+        general_h.remove(['?', '?', '?', '?', '?', '?'])
+    return specific_h, general_h
+print("*"*20,"Candidate Elimination Agorithm","*"*20)
+s_final, g_final = learn(concepts, target)
+print("Final Specific hypothesis:", s_final)
+print("Final General hypothesis:", g_final)
